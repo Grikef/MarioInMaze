@@ -26,6 +26,12 @@ void Level::setValue(int _i, int _j, int _value)
 }
 
 
+void Level::setValue(Vector2<int> _position, int _value)
+{
+	this->current_map.setValue(_position.x, _position.y, _value);
+}
+
+
 void Level::SetMap(Matrix _matrix)
 {
 	  this->origin_map.setValues(_matrix.getValues(), _matrix.getSize());

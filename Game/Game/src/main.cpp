@@ -53,38 +53,9 @@ int main(int argc, char* argv[])
 }
 
 
-void ActorCollaider(Direction _direction)
+void ActorCollaider(Vector2<int> _direction)
 {
-	Vector2<int> target = mainActor->getPosition();
-
-	switch (_direction)
-	{
-		case Direction::UP:
-		{
-			target.y += 1;
-			break;
-		}
-
-		case Direction::LEFT:
-		{
-			target.x -= 1;
-			break;
-		}
-
-		case Direction::DOWN:
-		{
-			target.y -= 1;
-			break;
-		}
-
-		case Direction::RIGHT:
-		{
-			target.x += 1;
-			break;
-		}
-	}
-
-	int object = loadedLevel->getValue(target);
+	int object = loadedLevel->getValue(mainActor->getPosition() + _direction);
 
 	if (object == Texture::TextureName::WALL)
 	{
@@ -95,27 +66,20 @@ void ActorCollaider(Direction _direction)
 		if (object == Texture::TextureName::FINISH)
 		{
 			currentLevel++;
-			if (currentLevel != levels.end())
-			{
-				getMatrix(*currentLevel, map);
-				loadedLevel->SetMap(map);
-				mainActor->setPosition(1, 1);
-				mainActor->clearBackpack();
-				ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
-				return;
-			}
-			else
+			mainActor->setPosition(1, 1);
+			mainActor->clearBackpack();
+
+			if (currentLevel == levels.end())
 			{
 				currentScreen = 1;
 				currentLevel = levels.begin();
-				getMatrix(*currentLevel, map);
-				loadedLevel->SetMap(map);
-				mainActor->setPosition(1, 1);
-				ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
 				glutKeyboardFunc(NULL);
 				glutMouseFunc(ProcessMouseMenu);
-				return;
 			}
+
+			getMatrix(*currentLevel, map);
+			loadedLevel->SetMap(map);
+			ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
 		}
 
 		if (object == Texture::TextureName::YELLOW_DOOR || object == Texture::TextureName::GREEN_DOOR)
@@ -127,7 +91,7 @@ void ActorCollaider(Direction _direction)
 
 			if (mainActor->isInBackpack(key))
 			{
-				loadedLevel->setValue(target.x, target.y, Texture::TextureName::FLOOR);
+				loadedLevel->setValue(mainActor->getPosition() + _direction, Texture::TextureName::FLOOR);
 				mainActor->removeFromBackpack(key);
 				return;
 			}
@@ -145,43 +109,15 @@ void ActorCollaider(Direction _direction)
 						  Texture::TextureName::GREEN_KEY_IN_BACKPACK;
 
 			mainActor->addToBackpack(key);
-			loadedLevel->setValue(target.x, target.y, Texture::TextureName::FLOOR);
+			loadedLevel->setValue(mainActor->getPosition() + _direction, Texture::TextureName::FLOOR);
 		}
 
 		mainActor->moveTo(_direction);
 
 		if (object == Texture::TextureName::TELEPORT)
 		{
-			switch (mainActor->getDirection())
-			{
-				case Direction::UP:
-				{
-					mainActor->moveTo(Direction::UP);
-					mainActor->moveTo(Direction::UP);
-					break;
-				}
-
-				case Direction::RIGHT:
-				{
-					mainActor->moveTo(Direction::RIGHT);
-					mainActor->moveTo(Direction::RIGHT);
-					break;
-				}
-
-				case Direction::DOWN:
-				{
-					mainActor->moveTo(Direction::DOWN);
-					mainActor->moveTo(Direction::DOWN);
-					break;
-				}
-
-				case Direction::LEFT:
-				{
-					mainActor->moveTo(Direction::LEFT);
-					mainActor->moveTo(Direction::LEFT);
-					break;
-				}
-			}
+			mainActor->moveTo(_direction);
+			mainActor->moveTo(_direction);
 		}
 	}
 }

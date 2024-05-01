@@ -8,8 +8,8 @@
 class Player : public Actor
 {
 private:
-	Direction direction{ Direction::RIGHT };
-	Direction directionToDraw{ Direction::RIGHT };
+	Vector2<int> direction{ Direction::RIGHT };
+	Vector2<int> directionToDraw{ Direction::RIGHT };
 	Backpack* backpakc = new Backpack();
 
 public:
@@ -24,9 +24,9 @@ public:
 
 	void clearBackpack();
 
-	Direction getDirection();
+	Vector2<int> getDirection();
 
-	void moveTo(Direction _direction);
+	void moveTo(Vector2<int>);
 
 	void display(int);
 };

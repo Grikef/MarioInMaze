@@ -1,11 +1,13 @@
 
 #pragma once
+#include "vector2.h"
 
 
-enum class Direction
+static class Direction
 {
-	UP = 0,
-	RIGHT,
-	DOWN,
-	LEFT
+public:
+	static const Vector2<int> UP;
+	static const Vector2<int> RIGHT;
+	static const Vector2<int> DOWN;
+	static const Vector2<int> LEFT;
 };
