@@ -41,7 +41,7 @@ void Texture::initTextures()
 	file_names[TextureName::LEVEL6] = prefix + "6.png";
 	file_names[TextureName::LEVEL7] = prefix + "7.png";
 	file_names[TextureName::LEVEL8] = prefix + "8.png";
-	file_names[TextureName::LEVEL9] = prefix + "9.png";
+	file_names[TextureName::BACK] = prefix + "back.png";
 
 	int width{}, height{};
 	unsigned char* image{};
@@ -129,7 +129,7 @@ char* Texture::getColor(int id)
 		case TextureName::LEVEL6:
 		case TextureName::LEVEL7:
 		case TextureName::LEVEL8:
-		case TextureName::LEVEL9:
+		case TextureName::BACK:
 		{
 			color = new char[3] { (char)210, (char)120, (char)55 };
 			break;

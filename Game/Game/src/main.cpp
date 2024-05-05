@@ -6,7 +6,7 @@
 #include "player.h"
 #include "direction.h"
 #include "level.h"
-#include "txt_file.h"
+#include "txt_file.cpp"
 #include "textures.h"
 #include "arbiter.h"
 
@@ -235,7 +235,7 @@ void RenderLevels()
 	glVertex2f(6.0f * unit, 1.0f * unit);
 	glEnd();
 
-	glBindTexture(GL_TEXTURE_2D, Texture::TextureName::LEVEL9 + 1);
+	glBindTexture(GL_TEXTURE_2D, Texture::TextureName::BACK + 1);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 1.0f);

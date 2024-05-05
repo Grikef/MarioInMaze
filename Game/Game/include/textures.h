@@ -36,7 +36,7 @@ public:
 		LEVEL6 = 19,
 		LEVEL7 = 20,
 		LEVEL8 = 21,
-		LEVEL9 = 22,
+		BACK = 22,
 		ENUM_COUNT = 23
 	};
 
