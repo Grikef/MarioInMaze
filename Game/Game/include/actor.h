@@ -11,7 +11,7 @@ class Actor
 {
 protected:
 	Vector2<int> position{ 1, 1 };
-	Vector2<int> direction{ 0, 0 };
+	Vector2<int> direction{ Direction::RIGHT };
 
 public:
 	Actor() = default;
@@ -19,11 +19,13 @@ public:
 
 	Vector2<int> getPosition();
 
-	int getDirection();
+	Vector2<int> getDirection();
 
 	void setPosition(int, int);
 
-	void moveTo(Direction);
+	void setPosition(Vector2<int>);
+
+	void moveTo(Vector2<int>);
 
 	void display();
 };

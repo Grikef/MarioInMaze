@@ -8,9 +8,9 @@ Vector2<int> Actor::getPosition()
 }
 
 
-int Actor::getDirection()
+Vector2<int> Actor::getDirection()
 {
-	
+	return this->direction;
 }
 
 
@@ -21,34 +21,16 @@ void Actor::setPosition(int _x, int _y)
 }
 
 
-void Actor::moveTo(Direction _direction)
+void Actor::setPosition(Vector2<int> _position)
 {
-	switch (_direction)
-	{
-	case Direction::UP:
-		{
-			this->position.y += 1;
-			break;
-		}
+	this->position.x = _position.x;
+	this->position.y = _position.y;
+}
 
-	case Direction::RIGHT:
-		{
-			this->position.x += 1;
-			break;
-		}
 
-	case Direction::DOWN:
-		{
-			this->position.y -= 1;
-			break;
-		}
-
-	case Direction::LEFT:
-		{
-			this->position.x -= 1;
-			break;
-		}
-	}
+void Actor::moveTo(Vector2<int> _direction)
+{
+	this->position = this->position + _direction;
 }
 
 

@@ -18,10 +18,18 @@ public:
 	~Level() = default;
 
 	int getValue(int, int);
+
 	int getValue(Vector2<int>);
+
 	int getSize();
+
 	void setValue(int, int, int);
+
+	void setValue(Vector2<int>, int);
+
 	void SetMap(Matrix);
+
 	void Reset();
+
 	void display();
 };

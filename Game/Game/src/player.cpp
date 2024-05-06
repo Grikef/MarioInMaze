@@ -33,45 +33,25 @@ void Player::clearBackpack()
 }
 
 
-Direction Player::getDirection()
+Vector2<int> Player::getDirection()
 {
 	return this->direction;
 }
 
 
-void Player::moveTo(Direction _direction)
+void Player::moveTo(Vector2<int> _direction)
 {
-	switch (_direction)
+	this->direction = _direction;
+	this->position += _direction;
+	
+	if (_direction == Direction::RIGHT)
 	{
-		case Direction::UP:
-		{
-			this->direction = Direction::UP;
-			this->position.y += 1;
-			break;
-		}
+		this->directionToDraw = _direction;
+	}
 
-		case Direction::RIGHT:
-		{
-			this->direction = Direction::RIGHT;
-			this->directionToDraw = Direction::RIGHT;
-			this->position.x += 1;
-			break;
-		}
-
-		case Direction::DOWN:
-		{
-			this->direction = Direction::DOWN;
-			this->position.y -= 1;
-			break;
-		}
-
-		case Direction::LEFT:
-		{
-			this->direction = Direction::LEFT;
-			this->directionToDraw = Direction::LEFT;
-			this->position.x -= 1;
-			break;
-		}
+	if (_direction == Direction::LEFT)
+	{
+		this->directionToDraw = _direction;
 	}
 }
 

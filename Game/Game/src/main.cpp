@@ -6,8 +6,9 @@
 #include "player.h"
 #include "direction.h"
 #include "level.h"
-#include "txt_file.h"
+#include "txt_file.cpp"
 #include "textures.h"
+#include "arbiter.h"
 
 
 std::list<std::string> levels{};
@@ -16,9 +17,10 @@ std::list<std::string> ::iterator currentLevel;
 Player* mainActor = new Player();
 Level* loadedLevel = new Level();
 Matrix map{};
+MoveArbiter* mvArbiter = MoveArbiter::getInstance();
 int currentScreen = 1;
 
-void ActorCollaider(Direction _direction);
+
 void RenderGame();
 void RenderMenu();
 void RenderLevels();
@@ -29,7 +31,7 @@ void RerenderingLevels(int value);
 void ProcessNormalKeys(unsigned char key, int x, int y);
 void ProcessMouseMenu(int button, int state, int x, int y);
 void ProcessMouseLevels(int button, int state, int x, int y);
-void loadLevel(int levelNumber);
+void LoadLevel(bool next, int levelNumber = 0);
 void ChangeWindowSize(int width, int height);
 
 
@@ -39,7 +41,7 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
 	glutInitWindowPosition(300, 100);
-	int game = glutCreateWindow("Castle prisoner");
+	int game = glutCreateWindow("MarioInMaze");
 	glutReshapeFunc(ChangeWindowSize);
 	//glutKeyboardFunc(ProcessNormalKeys);
 	glutMouseFunc(ProcessMouseMenu);
@@ -50,140 +52,6 @@ int main(int argc, char* argv[])
 	Setup();
 	glutMainLoop();
 	return 0;
-}
-
-
-void ActorCollaider(Direction _direction)
-{
-	Vector2<int> target = mainActor->getPosition();
-
-	switch (_direction)
-	{
-		case Direction::UP:
-		{
-			target.y += 1;
-			break;
-		}
-
-		case Direction::LEFT:
-		{
-			target.x -= 1;
-			break;
-		}
-
-		case Direction::DOWN:
-		{
-			target.y -= 1;
-			break;
-		}
-
-		case Direction::RIGHT:
-		{
-			target.x += 1;
-			break;
-		}
-	}
-
-	int object = loadedLevel->getValue(target);
-
-	if (object == Texture::TextureName::WALL)
-	{
-		return;
-	}
-	else
-	{
-		if (object == Texture::TextureName::FINISH)
-		{
-			currentLevel++;
-			if (currentLevel != levels.end())
-			{
-				getMatrix(*currentLevel, map);
-				loadedLevel->SetMap(map);
-				mainActor->setPosition(1, 1);
-				mainActor->clearBackpack();
-				ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
-				return;
-			}
-			else
-			{
-				currentScreen = 1;
-				currentLevel = levels.begin();
-				getMatrix(*currentLevel, map);
-				loadedLevel->SetMap(map);
-				mainActor->setPosition(1, 1);
-				ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
-				glutKeyboardFunc(NULL);
-				glutMouseFunc(ProcessMouseMenu);
-				return;
-			}
-		}
-
-		if (object == Texture::TextureName::YELLOW_DOOR || object == Texture::TextureName::GREEN_DOOR)
-		{
-			Texture::TextureName key = 
-				object == Texture::TextureName::YELLOW_DOOR ? 
-						  Texture::TextureName::YELLOW_KEY_IN_BACKPACK : 
-						  Texture::TextureName::GREEN_KEY_IN_BACKPACK;
-
-			if (mainActor->isInBackpack(key))
-			{
-				loadedLevel->setValue(target.x, target.y, Texture::TextureName::FLOOR);
-				mainActor->removeFromBackpack(key);
-				return;
-			}
-			else
-			{
-				return;
-			}
-		}
-
-		if (object == Texture::TextureName::YELLOW_KEY || object == Texture::TextureName::GREEN_KEY)
-		{
-			Texture::TextureName key = 
-				object == Texture::TextureName::YELLOW_KEY ? 
-						  Texture::TextureName::YELLOW_KEY_IN_BACKPACK : 
-						  Texture::TextureName::GREEN_KEY_IN_BACKPACK;
-
-			mainActor->addToBackpack(key);
-			loadedLevel->setValue(target.x, target.y, Texture::TextureName::FLOOR);
-		}
-
-		mainActor->moveTo(_direction);
-
-		if (object == Texture::TextureName::TELEPORT)
-		{
-			switch (mainActor->getDirection())
-			{
-				case Direction::UP:
-				{
-					mainActor->moveTo(Direction::UP);
-					mainActor->moveTo(Direction::UP);
-					break;
-				}
-
-				case Direction::RIGHT:
-				{
-					mainActor->moveTo(Direction::RIGHT);
-					mainActor->moveTo(Direction::RIGHT);
-					break;
-				}
-
-				case Direction::DOWN:
-				{
-					mainActor->moveTo(Direction::DOWN);
-					mainActor->moveTo(Direction::DOWN);
-					break;
-				}
-
-				case Direction::LEFT:
-				{
-					mainActor->moveTo(Direction::LEFT);
-					mainActor->moveTo(Direction::LEFT);
-					break;
-				}
-			}
-		}
-	}
 }
 
 
@@ -367,7 +235,7 @@ void RenderLevels()
 	glVertex2f(6.0f * unit, 1.0f * unit);
 	glEnd();
 
-	glBindTexture(GL_TEXTURE_2D, Texture::TextureName::LEVEL9 + 1);
+	glBindTexture(GL_TEXTURE_2D, Texture::TextureName::BACK + 1);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 1.0f);
@@ -414,6 +282,8 @@ void Setup()
 	getMatrix(*currentLevel, map);
 	loadedLevel->SetMap(map);
 	mainActor->setPosition(1, 1);
+	mvArbiter->setPlayer(mainActor);
+	mvArbiter->setLevel(loadedLevel);
 }
 
 
@@ -477,7 +347,7 @@ void ProcessNormalKeys(unsigned char key, int x, int y)
 		case 119: // w
 		case 246: // ц
 		{
-			ActorCollaider(Direction::UP);
+			mvArbiter->goTo(Direction::UP);
 			break;
 		}
 
@@ -485,7 +355,7 @@ void ProcessNormalKeys(unsigned char key, int x, int y)
 		case 97: // a
 		case 244: // ф
 		{
-			ActorCollaider(Direction::LEFT);
+			mvArbiter->goTo(Direction::LEFT);
 			break;
 		}
 
@@ -493,7 +363,7 @@ void ProcessNormalKeys(unsigned char key, int x, int y)
 		case 115: // s
 		case 251: // ы
 		{
-			ActorCollaider(Direction::DOWN);
+			mvArbiter->goTo(Direction::DOWN);
 			break;
 		}
 
@@ -501,7 +371,7 @@ void ProcessNormalKeys(unsigned char key, int x, int y)
 		case 100: // d
 		case 226: // в
 		{
-			ActorCollaider(Direction::RIGHT);
+			mvArbiter->goTo(Direction::RIGHT);
 			break;
 		}
 
@@ -546,8 +416,6 @@ void ProcessMouseMenu(int button, int state, int x, int y)
 			}
 
 		}
-
-		//std::cout << "x= " << x << '\n' << "y= " << y << '\n';
 	}
 }
 
@@ -565,17 +433,17 @@ void ProcessMouseLevels(int button, int state, int x, int y)
 		{
 			if (y >= (ySize - 3 * yUnit) && y <= (ySize - 1 * yUnit))
 			{
-				loadLevel(7);
+				LoadLevel(false, 7);
 			}
 
 			if (y >= (ySize - 6 * yUnit) && y <= (ySize - 4 * yUnit))
 			{
-				loadLevel(4);
+				LoadLevel(false, 4);
 			}
 
 			if (y >= (ySize - 9 * yUnit) && y <= (ySize - 7 * yUnit))
 			{
-				loadLevel(1);
+				LoadLevel(false, 1);
 			}
 		}
 
@@ -583,17 +451,17 @@ void ProcessMouseLevels(int button, int state, int x, int y)
 		{
 			if (y >= (ySize - 3 * yUnit) && y <= (ySize - 1 * yUnit))
 			{
-				loadLevel(8);
+				LoadLevel(false, 8);
 			}
 
 			if (y >= (ySize - 6 * yUnit) && y <= (ySize - 4 * yUnit))
 			{
-				loadLevel(5);
+				LoadLevel(false, 5);
 			}
 
 			if (y >= (ySize - 9 * yUnit) && y <= (ySize - 7 * yUnit))
 			{
-				loadLevel(2);
+				LoadLevel(false, 2);
 			}
 		}
 
@@ -608,12 +476,12 @@ void ProcessMouseLevels(int button, int state, int x, int y)
 
 			if (y >= (ySize - 6 * yUnit) && y <= (ySize - 4 * yUnit))
 			{
-				loadLevel(6);
+				LoadLevel(false, 6);
 			}
 
 			if (y >= (ySize - 9 * yUnit) && y <= (ySize - 7 * yUnit))
 			{
-				loadLevel(3);
+				LoadLevel(false, 3);
 			}
 		}
 
@@ -621,21 +489,37 @@ void ProcessMouseLevels(int button, int state, int x, int y)
 }
 
 
-void loadLevel(int levelNumber)
+void LoadLevel(bool next, int levelNumber)
 {
-
-	currentLevel = levels.begin();
-	int i = 0;
-	while (i < levelNumber - 1 && currentLevel != levels.end())
+	if (next)
 	{
 		currentLevel++;
-		i++;
+	}
+	else
+	{
+		currentLevel = levels.begin();
+		int i = 0;
+
+		while (i < levelNumber - 1 && currentLevel != levels.end())
+		{
+			currentLevel++;
+			i++;
+		}
+	}
+
+	if (currentLevel == levels.end())
+	{
+		currentScreen = 1;
+		currentLevel = levels.begin();
+		glutKeyboardFunc(NULL);
+		glutMouseFunc(ProcessMouseMenu);
 	}
 
 	getMatrix(*currentLevel, map);
 	loadedLevel->SetMap(map);
 	mainActor->setPosition(1, 1);
 	mainActor->clearBackpack();
+	mvArbiter->setLevel(loadedLevel);
 	ChangeWindowSize(Settings::getWindowXSize(), Settings::getWindowYSize());
 
 	glutDisplayFunc(RenderGame);
