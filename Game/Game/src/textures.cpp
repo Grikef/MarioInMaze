@@ -42,6 +42,7 @@ void Texture::initTextures()
 	file_names[TextureName::LEVEL7] = prefix + "7.png";
 	file_names[TextureName::LEVEL8] = prefix + "8.png";
 	file_names[TextureName::BACK] = prefix + "back.png";
+	file_names[TextureName::BACKPACK] = prefix + "backpack.png";
 
 	int width{}, height{};
 	unsigned char* image{};

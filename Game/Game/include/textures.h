@@ -37,7 +37,8 @@ public:
 		LEVEL7 = 20,
 		LEVEL8 = 21,
 		BACK = 22,
-		ENUM_COUNT = 23
+		BACKPACK = 23,
+		ENUM_COUNT = 24
 	};
 
 	static char* getColor(int);
